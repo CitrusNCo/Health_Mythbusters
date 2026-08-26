@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Health Myth Buster</title>
+
+  <!-- OCR library -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f8fb;
+      color: #17212b;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 500px;
+      margin: auto;
+      min-height: 100vh;
+      background: white;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1769aa, #0b8f87);
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .intro h2 {
+      font-size: 22px;
+      margin-bottom: 7px;
+    }
+
+    .intro p {
+      color: #64727e;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 17px;
+      margin: 8px 0;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #1769aa;
+      color: white;
+    }
+
+    .button.secondary {
+      background: #eaf3f8;
+      color: #1769aa;
+    }
+
+    .button:hover {
+      opacity: 0.9;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      border: 2px solid #d7e0e7;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      resize: vertical;
+      outline: none;
+      margin: 10px 0;
+    }
+
+    textarea:focus {
+      border-color: #1769aa;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .section {
+      margin-top: 22px;
+    }
+
+    .section h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #camera {
+      width: 100%;
+      border-radius: 15px;
+      background: black;
+      margin-top: 10px;
+    }
+
+    #preview {
+      width: 100%;
+      border-radius: 15px;
+      margin-top: 12px;
+    }
+
+    .status {
+      text-align: center;
+      margin: 15px 0;
+      font-size: 15px;
+      color: #1769aa;
+      font-weight: bold;
+    }
+
+    .result-card {
+      margin-top: 20px;
+      padding: 22px;
+      border-radius: 18px;
+      text-align: center;
+      background: #f4f8fb;
+    }
+
+    .verdict {
+      font-size: 30px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    .true {
+      color: #168447;
+    }
+
+    .false {
+      color: #d93434;
+    }
+
+    .uncertain {
+      color: #d28a00;
+    }
+
+    .claim-box {
+      background: white;
+      padding: 14px;
+      border-radius: 12px;
+      margin: 15px 0;
+      text-align: left;
+      border: 1px solid #dce5eb;
+      line-height: 1.5;
+    }
+
+    .danger {
+      margin: 15px 0;
+      padding: 13px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    .danger.yes {
+      background: #ffe6e6;
+      color: #b52222;
+    }
+
+    .danger.no {
+      background: #e5f7ec;
+      color: #176b39;
+    }
+
+    .danger.unknown {
+      background: #fff4d6;
+      color: #8a5b00;
+    }
+
+    .source {
+      margin-top: 15px;
+      padding: 14px;
+      background: white;
+      border-radius: 12px;
+      text-align: left;
+    }
+
+    .source a {
+      color: #1769aa;
+      word-break: break-word;
+    }
+
+    .warning {
+      font-size: 12px;
+      color: #687680;
+      margin-top: 20px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    footer {
+      padding: 20px;
+      text-align: center;
+      color: #788690;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <div class="logo">🩺</div>
+    <h1>Health Myth Buster</h1>
+    <p>Check before you believe. Verify before you share.</p>
+  </header>
+
+  <main>
+
+    <div class="intro">
+      <h2>What do you want to check?</h2>
+      <p>
+        Enter a health claim, upload a WhatsApp screenshot,
+        or scan a message using your camera.
+      </p>
+    </div>
+
+    <!-- TYPE CLAIM -->
+    <div class="section">
+      <h3>⌨️ Type a Claim</h3>
+
+      <textarea
+        id="claimInput"
+        placeholder="Example: Lemon juice cures COVID-19">
+      </textarea>
+
+      <button class="button" onclick="checkTypedClaim()">
+        🔍 Check Claim
+      </button>
+    </div>
+
+    <!-- UPLOAD IMAGE -->
+    <div class="section">
+      <h3>🖼️ Upload Screenshot</h3>
+
+      <label for="imageInput" class="button secondary"
+             style="display:block;text-align:center;">
+        📱 Choose WhatsApp Screenshot
+      </label>
+
+      <input
+        id="imageInput"
+        type="file"
+        accept="image/*"
+        onchange="processImage(event)"
+      >
+
+      <img id="preview" class="hidden">
+
+      <div id="ocrStatus" class="status"></div>
+
+      <textarea
+        id="ocrText"
+        class="hidden"
+        placeholder="Text detected from your screenshot will appear here.">
+      </textarea>
+
+      <button
+        id="ocrButton"
+        class="button hidden"
+        onclick="checkOCRClaim()">
+        🔍 Check Extracted Claim
+      </button>
+    </div>
+
+    <!-- CAMERA -->
+    <div class="section">
+      <h3>📷 Scan a Claim</h3>
+
+      <button class="button secondary" onclick="startCamera()">
+        📷 Open Camera
+      </button>
+
+      <video id="camera" class="hidden" autoplay playsinline></video>
+
+      <button
+        id="captureButton"
+        class="button hidden"
+        onclick="captureImage()">
+        📸 Capture & Read
+      </button>
+
+      <canvas id="canvas" class="hidden"></canvas>
+
+      <div id="cameraStatus" class="status"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result" class="hidden"></div>
+
+    <p class="warning">
+      ⚠️ This is an educational prototype. It should not replace
+      advice from a qualified healthcare professional.
+    </p>
+
+  </main>
+
+  <footer>
+    Health Myth Buster • STEM Project
+  </footer>
+
+</div>
+
+
+<script>
+
+  /*
+   ==========================================
+   HEALTH MYTH DATABASE
+   ==========================================
+  */
+
+  const healthClaims = [
+
+    {
+      keywords: [
+        "lemon",
+        "lemon juice",
+        "cure covid",
+        "cures covid",
+        "coronavirus cure"
+      ],
+
+      verdict: "FALSE",
+
+      danger: "YES",
+
+      explanation:
+        "There is no evidence that lemon juice cures COVID-19. Believing a false treatment claim could cause someone to delay appropriate medical care.",
+
+      source:
+        "World Health Organization",
+
+      url:
+        "https://www.who.int/"
+    },
+
+    {
+      keywords: [
+        "vaccine",
+        "vaccines",
+        "autism",
+        "vaccines cause autism"
+      ],
+
+      verdict: "FALSE",
+
+      danger: "YES",
+
+      explanation:
+        "High-quality scientific research has found no credible evidence that vaccines cause autism. Avoiding recommended vaccines can increase the risk of preventable diseases.",
+
+      source:
+        "World Health Organization",
+
+      url:
+        "https://www.who.int/health-topics/vaccines-and-immunization"
+    },
+
+    {
+      keywords: [
+        "antibiotics",
+        "antibiotic",
+        "cure flu",
+        "cure influenza",
+        "flu antibiotics"
+      ],
+
+      verdict: "FALSE",
+
+      danger: "YES",
+
+      explanation:
+        "Antibiotics treat certain bacterial infections, not viruses such as influenza. Using antibiotics when they are not needed can contribute to antibiotic resistance.",
+
+      source:
+        "Centers for Disease Control and Prevention",
+
+      url:
+        "https://www.cdc.gov/antibiotic-use/"
+    },
+
+    {
+      keywords: [
+        "drink bleach",
+        "bleach",
+        "disinfectant",
+        "drink disinfectant"
+      ],
+
+      verdict: "FALSE",
+
+      danger: "YES",
+
+      explanation:
+        "Household disinfectants and bleach are not medicines and must not be consumed. They can cause serious poisoning.",
+
+      source:
+        "Centers for Disease Control and Prevention",
+
+      url:
+        "https://www.cdc.gov/chemical-emergencies/"
+    },
+
+    {
+      keywords: [
+        "vitamin c",
+        "vitamin c prevents covid",
+        "vitamin c cure covid",
+        "vitamin c cures covid"
+      ],
+
+      verdict: "UNVERIFIED",
+
+      danger: "UNKNOWN",
+
+      explanation:
+        "Vitamin C is an important nutrient, but claims that taking vitamin C can prevent or cure COVID-19 should not be accepted without strong clinical evidence.",
+
+      source:
+        "National Institutes of Health",
+
+      url:
+        "https://ods.od.nih.gov/factsheets/VitaminC-Consumer/"
+    }
+
+  ];
+
+
+  /*
+   ==========================================
+   CHECK CLAIM
+   ==========================================
+  */
+
+  function checkClaim(claim) {
+
+    if (!claim || claim.trim() === "") {
+
+      showMessage("Please enter a health claim first.");
+
+      return;
+    }
+
+    const text = claim.toLowerCase();
+
+    let bestMatch = null;
+    let highestScore = 0;
+
+    healthClaims.forEach(item => {
+
+      let score = 0;
+
+      item.keywords.forEach(keyword => {
+
+        if (text.includes(keyword.toLowerCase())) {
+          score++;
+        }
+
+      });
+
+      if (score > highestScore) {
+
+        highestScore = score;
+        bestMatch = item;
+
+      }
+
+    });
+
+
+    /*
+      If there isn't a strong match,
+      show UNVERIFIED.
+    */
+
+    if (!bestMatch || highestScore === 0) {
+
+      showResult({
+
+        verdict: "UNVERIFIED",
+
+        danger: "UNKNOWN",
+
+        explanation:
+          "Our prototype could not confidently verify this claim using its current evidence database. More reliable evidence is needed before deciding whether the claim is true or false.",
+
+        source:
+          "World Health Organization",
+
+        url:
+          "https://www.who.int/",
+
+        claim: claim
+
+      });
+
+      return;
+    }
+
+
+    showResult({
+
+      ...bestMatch,
+
+      claim: claim
+
+    });
+
+  }
+
+
+  function checkTypedClaim() {
+
+    const claim =
+      document.getElementById("claimInput").value;
+
+    checkClaim(claim);
+
+  }
+
+
+  function checkOCRClaim() {
+
+    const claim =
+      document.getElementById("ocrText").value;
+
+    checkClaim(claim);
+
+  }
+
+
+  /*
+   ==========================================
+   DISPLAY RESULT
+   ==========================================
+  */
+
+  function showResult(data) {
+
+    const result =
+      document.getElementById("result");
+
+    result.classList.remove("hidden");
+
+    let verdictClass = "uncertain";
+
+    if (data.verdict === "TRUE") {
+      verdictClass = "true";
+    }
+
+    if (data.verdict === "FALSE") {
+      verdictClass = "false";
+    }
+
+
+    let dangerClass = "unknown";
+
+    if (data.danger === "YES") {
+      dangerClass = "yes";
+    }
+
+    if (data.danger === "NO") {
+      dangerClass = "no";
+    }
+
+
+    let dangerText =
+      "⚠️ Danger level could not be determined.";
+
+    if (data.danger === "YES") {
+
+      dangerText =
+        "⚠️ POTENTIALLY DANGEROUS — believing this claim could lead to harm.";
+
+    }
+
+    if (data.danger === "NO") {
+
+      dangerText =
+        "✅ No significant danger identified from the claim itself.";
+
+    }
+
+
+    result.innerHTML = `
+
+      <div class="result-card">
+
+        <h2>Fact Check Result</h2>
+
+        <div class="verdict ${verdictClass}">
+          ${getVerdictIcon(data.verdict)}
+          ${data.verdict}
+        </div>
+
+        <div class="claim-box">
+
+          <strong>Claim checked:</strong>
+
+          <br><br>
+
+          ${escapeHTML(data.claim)}
+
+        </div>
+
+        <div class="danger ${dangerClass}">
+          ${dangerText}
+        </div>
+
+        <p style="line-height:1.6;text-align:left;">
+          <strong>What we found:</strong><br><br>
+          ${data.explanation}
+        </p>
+
+        <div class="source">
+
+          <strong>Trusted Source</strong>
+
+          <br><br>
+
+          ${escapeHTML(data.source)}
+
+          <br><br>
+
+          <a
+            href="${data.url}"
+            target="_blank"
+            rel="noopener noreferrer">
+
+            Open trusted source →
+
+          </a>
+
+        </div>
+
+        <button
+          class="button"
+          onclick="resetApp()"
+          style="margin-top:20px;">
+
+          🔄 Check Another Claim
+
+        </button>
+
+      </div>
+    `;
+
+    result.scrollIntoView({
+      behavior: "smooth"
+    });
+
+  }
+
+
+  function getVerdictIcon(verdict) {
+
+    if (verdict === "TRUE") return "✅";
+
+    if (verdict === "FALSE") return "❌";
+
+    return "⚠️";
+
+  }
+
+
+  function escapeHTML(text) {
+
+    const div =
+      document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+  }
+
+
+  function showMessage(message) {
+
+    alert(message);
+
+  }
+
+
+  /*
+   ==========================================
+   OCR — UPLOAD SCREENSHOT
+   ==========================================
+  */
+
+  async function processImage(event) {
+
+    const file =
+      event.target.files[0];
+
+    if (!file) return;
+
+
+    const preview =
+      document.getElementById("preview");
+
+    const status =
+      document.getElementById("ocrStatus");
+
+    const textBox =
+      document.getElementById("ocrText");
+
+    const checkButton =
+      document.getElementById("ocrButton");
+
+
+    preview.src =
+      URL.createObjectURL(file);
+
+    preview.classList.remove("hidden");
+
+
+    status.innerText =
+      "🔄 Reading the screenshot...";
+
+
+    textBox.classList.add("hidden");
+
+    checkButton.classList.add("hidden");
+
+
+    try {
+
+      const result =
+        await Tesseract.recognize(
+          file,
+          "eng"
+        );
+
+
+      textBox.value =
+        result.data.text.trim();
+
+
+      status.innerText =
+        "✅ Text detected! You can edit it before checking.";
+
+
+      textBox.classList.remove("hidden");
+
+      checkButton.classList.remove("hidden");
+
+
+    }
+
+    catch(error) {
+
+      console.error(error);
+
+      status.innerText =
+        "❌ Could not read the image. Try a clearer screenshot.";
+
+    }
+
+  }
+
+
+  /*
+   ==========================================
+   CAMERA SCANNER
+   ==========================================
+  */
+
+  let cameraStream = null;
+
+
+  async function startCamera() {
+
+    const video =
+      document.getElementById("camera");
+
+    const capture =
+      document.getElementById("captureButton");
+
+    const status =
+      document.getElementById("cameraStatus");
+
+
+    try {
+
+      cameraStream =
+        await navigator.mediaDevices.getUserMedia({
+
+          video: {
+            facingMode: "environment"
+          },
+
+          audio: false
+
+        });
+
+
+      video.srcObject =
+        cameraStream;
+
+      video.classList.remove("hidden");
+
+      capture.classList.remove("hidden");
+
+      status.innerText =
+        "📷 Point the camera at the health message.";
+
+    }
+
+    catch(error) {
+
+      console.error(error);
+
+      status.innerText =
+        "❌ Camera access was not available. Please allow camera permission.";
+
+    }
+
+  }
+
+
+  async function captureImage() {
+
+    const video =
+      document.getElementById("camera");
+
+    const canvas =
+      document.getElementById("canvas");
+
+    const status =
+      document.getElementById("cameraStatus");
+
+
+    canvas.width =
+      video.videoWidth;
+
+    canvas.height =
+      video.videoHeight;
+
+
+    const context =
+      canvas.getContext("2d");
+
+
+    context.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+
+    status.innerText =
+      "🔄 Reading the scanned message...";
+
+
+    canvas.toBlob(async function(blob) {
+
+      try {
+
+        const result =
+          await Tesseract.recognize(
+            blob,
+            "eng"
+          );
+
+
+        const extractedText =
+          result.data.text.trim();
+
+
+        if (!extractedText) {
+
+          status.innerText =
+            "❌ No readable text found. Try again with better lighting.";
+
+          return;
+
+        }
+
+
+        status.innerText =
+          "✅ Claim scanned successfully!";
+
+
+        checkClaim(extractedText);
+
+
+      }
+
+      catch(error) {
+
+        console.error(error);
+
+        status.innerText =
+          "❌ Could not read the scanned text.";
+
+      }
+
+    });
+
+  }
+
+
+  /*
+   ==========================================
+   RESET
+   ==========================================
+  */
+
+  function resetApp() {
+
+    document.getElementById("claimInput").value = "";
+
+    document.getElementById("ocrText").value = "";
+
+    document.getElementById("result").innerHTML = "";
+
+    document.getElementById("result").classList.add("hidden");
+
+    document.getElementById("ocrText").classList.add("hidden");
+
+    document.getElementById("ocrButton").classList.add("hidden");
+
+    document.getElementById("preview").classList.add("hidden");
+
+    window.scrollTo({
+
+      top: 0,
+
+      behavior: "smooth"
+
+    });
+
+  }
+
+</script>
+
+</body>
+</html>
